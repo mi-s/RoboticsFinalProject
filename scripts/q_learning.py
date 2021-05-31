@@ -67,43 +67,63 @@ class QLearning(object):
 
 
     def do_action(self):
+        """
+        Take a random action out of all the possible actions at a given state, and publish
+        that action and at what state it was taken at in order for reward to get calculated.
+        """
+        # Get options or "action space" - possible actions that robot can take at its current state.
+        # Get list of next states possible from our action space.
         options = self.action_matrix[self.curr_state]
         next_states = []
-
         for i in range(len(options)):
             action_num = int(options[i])
             if action_num != -1:
                 next_states.append(i)
 
+        # If we have run out of actions possible to take at current state, reset state to 0 and return.
         if len(next_states) == 0:
             self.curr_state = 0
             self.next_state = 0
             return
 
+        # Select a random action to take within our action space. Specify the next state to occur
+        # as a result of taking this action.
         self.curr_action = np.random.choice(len(next_states))
         self.next_state = next_states[self.curr_action]
 
 
     def get_reward(self):
+        """
+        Calculate reward according to q learning algorithm. Track q matrix convergence if the new
+        reward value didn't change from the last update.
+        """
         # action was not performed, state was reset to 0    
         if self.curr_state == self.next_state:
             return
         
+        # Set a reward of 100 for reaching the finish state of the maze, 0 otherwise.
         reward = 0.0
         if self.next_state == self.end_state:
             reward = 100.0
 
+        # Calculate reward currently written in q matrix for our current state/action pair.
         current_reward = self.q_matrix[self.curr_state][self.curr_action]
+        # Calculate the max reward for the next state
         future_reward = max(self.q_matrix[self.next_state])
 
+        # Use the q learning algorithm to get a new reward
         new_reward = current_reward + self.alpha * (reward + self.gamma * future_reward - current_reward)
 
+        # If the new reward value didn't change from the last update, we count one instance of
+        # convergence and save this to the convergence_count. Otherwise, we write the new reward value
+        # in the q matrix.
         if current_reward == new_reward:
             self.convergence_count += 1
         else:
             self.convergence_count = 0
             self.q_matrix[self.curr_state][self.curr_action] = new_reward
 
+        # Update current state
         self.curr_state = self.next_state
 
 
@@ -118,6 +138,11 @@ class QLearning(object):
 
 
     def run(self):
+        """ Runs Q Learning code. """
+        # Until we reach our threshold level of convergence (5000 instances), continue running
+        # taking actions and calculating rewards in a loop. Note that when the algorithm chooses
+        # the "incorrect" option and there are no longer any possible actions, the state gets reset
+        # to the beginning of the maze.
         while self.convergence_count < self.convergence_max:
             self.do_action()
             self.get_reward()
