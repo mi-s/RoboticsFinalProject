@@ -13,7 +13,9 @@ INITIALIZED = "initialized"
 MOVE_FORWARD = "move_forward"
 SIMPLE_TURN_LEFT = "simple_turn_left"
 SIMPLE_TURN_RIGHT = "simple_turn_right"
-ACTION_TURN = "action_turn"
+ACTION_TURN_01 = "action_turn_01"
+ACTION_TURN_02 = "action_turn_02"
+ACTION_TURN_12 = "action_turn_12"
 CHECK_STATE = "check_state"
 CHECK_DISTANCE = "check_distance"
 
@@ -29,6 +31,7 @@ class MovementPerception(object):
         self.action_seq = []
         self.action_index = 0
         self.get_actions()
+        print(self.action_seq)
 
         self.distances_old = [0.0, 0.0, 0.0]
         self.distances = [0.0, 0.0, 0.0]
@@ -58,7 +61,6 @@ class MovementPerception(object):
             self.distances_old[i] = self.distances[i]
 
 
-
     def scan_distances(self, data):
         if self.robot_state != CHECK_DISTANCE:
             return
@@ -73,12 +75,12 @@ class MovementPerception(object):
                 self.distances[0] = data.ranges[i]
 
         self.distances[1] = self.drm
-        for i in self.right:
+        for i in self.left:
             if data.ranges[i] < self.distances[1]:
                 self.distances[1] = data.ranges[i]
 
         self.distances[2] = self.drm
-        for i in self.left:
+        for i in self.right:
             if data.ranges[i] < self.distances[2]:
                 self.distances[2] = data.ranges[i]
 
@@ -89,18 +91,28 @@ class MovementPerception(object):
         d0 = self.distances[0]
         d1 = self.distances[1]
         d2 = self.distances[2]
-        d0_ref = d0 * 2.5 
-        d1_ref = d1 * 2.5 
-        d2_ref = d2 * 2.5
+        d0_low = .6
+        d1d2_low = .8
+        high = 1.1
 
-        # if two openings: 
-        #   self.robot_state = ACTION_TURN
-        if d1 > d0_ref and d1 > d2_ref:
-            self.robot_state = SIMPLE_TURN_RIGHT
-        elif d2 > d0_ref and d2 > d1_ref:
+        if d0 < d0_low and d1 > high and d2 > high: 
+            # Left/Right Action
+            self.robot_state = ACTION_TURN_12
+        elif d0 > high and d1 > high and d2 < d1d2_low:
+            # Front/Left Action
+            print("d0, d1, d2", d0, " ", d1, " ", d2)
+            self.robot_state = ACTION_TURN_01
+        elif d0 > high and d1 < d1d2_low and d2 > high:
+            # Front/Right Action
+            self.robot_state = ACTION_TURN_02
+        elif d0 < d1d2_low and d1 > high and d2 < d1d2_low:
             self.robot_state = SIMPLE_TURN_LEFT
+        elif d0 < d1d2_low and d1 < d1d2_low and d2 > high: 
+            self.robot_state = SIMPLE_TURN_RIGHT
         else:
             self.robot_state = MOVE_FORWARD
+        
+        print(self.robot_state)
 
 
     def set_velocity(self):
@@ -112,27 +124,48 @@ class MovementPerception(object):
 
 
     def move_forward(self):
-        self.lin_vel = 0.15
+        self.lin_vel = 0.1
+
+        if self.distances[1] < .2:
+           # too close to left, turn right
+           self.ang_vel = -1 * (.2 - self.distances[1])
+           self.set_velocity()
+           rospy.sleep(.25)
+           print(self.distances[1])
+           return
+        elif self.distances[2] < .2:
+           # too close to right, turn slightly left 
+           self.ang_vel = 2 * (.2 - self.distances[2])
+           self.set_velocity()
+           rospy.sleep(.25)
+           print(self.distances[2])
+           return
+
 
         if self.distances[1] < self.distances_old[1]:
             # angled to left, turn slightly right 
-            self.ang_vel = 2 * (self.distances_old[1] - self.distances[1])
+            self.ang_vel = -4 * (self.distances_old[1] - self.distances[1])
         elif self.distances[2] < self.distances_old[2]:
             # angled to right, turn slightly left 
-            self.ang_vel = -4 * (self.distances_old[2] - self.distances[2])
+            self.ang_vel = 8 * (self.distances_old[2] - self.distances[2])
+
         self.set_velocity()
+
         rospy.sleep(.25)
 
 
     def do_turn(self, direction):
         # Turn robot in-place in given direction, then move forward one tile
-        if self.ang_vel != 0:
-            self.lin_vel = .15
+        if self.lin_vel > 0:
+            self.lin_vel = .1
             self.ang_vel = 0
-            rospy.sleep(.5)
-            self.lin_vel = 0
             self.set_velocity()
-            rospy.sleep(1)
+            rospy.sleep(1.5)
+
+        rospy.sleep(.5)
+        self.lin_vel = 0
+        self.set_velocity()
+        rospy.sleep(1)
 
         self.lin_vel = 0
         self.ang_vel = math.pi / 8 
@@ -145,9 +178,9 @@ class MovementPerception(object):
         self.ang_vel = 0
         self.set_velocity()
         rospy.sleep(1)
-        self.lin_vel = .15
+        self.lin_vel = .1
         self.set_velocity()
-        rospy.sleep(6)
+        rospy.sleep(9)
         self.lin_vel = 0
         self.set_velocity()
         rospy.sleep(1)
@@ -158,14 +191,51 @@ class MovementPerception(object):
 
 
     def do_action(self):
-        return
+        action = self.action_seq[self.action_index]
+
+        if self.lin_vel > 0:
+            self.lin_vel = .1
+            self.ang_vel = 0
+            self.set_velocity()
+            rospy.sleep(1.5)
+            
+        rospy.sleep(.5)
+        self.lin_vel = 0
+        self.set_velocity()
+        rospy.sleep(1)
+
+        if self.robot_state == ACTION_TURN_01:
+            if action == 0:
+                self.lin_vel = .15
+                self.set_velocity()
+                rospy.sleep(6)
+                self.lin_vel = 0
+                self.set_velocity()
+                rospy.sleep(1)
+            else:
+                self.do_turn("left")
+        elif self.robot_state == ACTION_TURN_02:
+            if action == 0:
+                self.lin_vel = .15
+                self.set_velocity()
+                rospy.sleep(6)
+                self.lin_vel = 0
+                self.set_velocity()
+                rospy.sleep(1)
+            else:
+                self.do_turn("right")
+        else:
+            if action == 0:
+                self.do_turn("left")
+            else:
+                self.do_turn("right")
 
 
     def run(self):
         while self.robot_state == INITIALIZING:
             pass
 
-        while self.action_index <= len(self.action_seq):                      
+        while self.action_index < len(self.action_seq):                      
             self.robot_state = CHECK_DISTANCE
             while self.robot_state == CHECK_DISTANCE:
                 pass
@@ -180,14 +250,14 @@ class MovementPerception(object):
                 self.do_turn("left")
             elif self.robot_state == SIMPLE_TURN_RIGHT:
                 self.do_turn("right")
-            elif self.robot_state == ACTION_TURN:
+            elif self.robot_state in [ACTION_TURN_01, ACTION_TURN_02, ACTION_TURN_12]:
                 self.do_action()
                 self.action_index += 1
             else:
                 print("error: unrecognized state")
                 return
 
-        while distances[0] > .1:
+        while self.distances[0] > .1:
             self.move_forward()
           
 if __name__ == "__main__":

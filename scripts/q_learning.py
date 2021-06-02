@@ -59,9 +59,9 @@ class QLearning(object):
 
         # Action 4
         # Correct action: 1 
-        # Possible State Changes: (0) 12 -> 25, (1) 12 -> 26
-        self.action_matrix[12][25] = 0
-        self.action_matrix[12][26] = 1 
+        # Possible State Changes: (0) 12 -> 24, (1) 12 -> 25
+        self.action_matrix[12][24] = 0
+        self.action_matrix[12][25] = 1 
 
         # End of maze, desired end-state = 1001 = state 25
 
