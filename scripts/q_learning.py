@@ -48,22 +48,22 @@ class QLearning(object):
         # Action 2
         # Correct action: 0
         # Possible State Changes: (0) 2 -> 5, (1) 2 -> 6
-        self.action_matrix[2][5] = 0 
-        self.action_matrix[2][6] = 1 
+        self.action_matrix[2][6] = 0 
+        self.action_matrix[2][7] = 1 
 
         # Action 3
-        # Correct action: 1
-        # Possible State Changes: (0) 5 -> 11, (1) 5 -> 12
-        self.action_matrix[5][11] = 0 
-        self.action_matrix[5][12] = 1 
+        # Correct action: 0 
+        # Possible State Changes: (0) 6 -> 11, (1) 6 -> 12
+        self.action_matrix[6][12] = 0 
+        self.action_matrix[6][13] = 1 
 
         # Action 4
-        # Correct action: 0 
+        # Correct action: 1 
         # Possible State Changes: (0) 12 -> 25, (1) 12 -> 26
         self.action_matrix[12][25] = 0
         self.action_matrix[12][26] = 1 
 
-        # End of maze, desired end-state = 2121
+        # End of maze, desired end-state = 1001 = state 25
 
 
     def do_action(self):

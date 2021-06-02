@@ -26,7 +26,7 @@ class MovementPerception(object):
         self.q_matrix_path = os.path.join(os.path.dirname(__file__), '../output/q_matrix.csv')
         self.q_matrix = np.loadtxt(self.q_matrix_path, delimiter=',')
     
-        self.action_seq = [0, 0, 0]
+        self.action_seq = []
         self.action_index = 0
         self.get_actions()
 
@@ -47,7 +47,11 @@ class MovementPerception(object):
 
 
     def get_actions(self):
-        return
+        for i in range(len(self.q_matrix)):
+            for j in range(len(self.q_matrix[i])):
+                if self.q_matrix[i][j] > 0.0:
+                    self.action_seq.append(j)
+
 
     def update_old_distances(self):
         for i in range(len(self.distances)):
