@@ -126,16 +126,16 @@ class MovementPerception(object):
     def move_forward(self):
         self.lin_vel = 0.1
 
-        if self.distances[1] < .2:
+        if self.distances[1] < .3:
            # too close to left, turn right
-           self.ang_vel = -1 * (.2 - self.distances[1])
+           self.ang_vel = -1 * (.3 - self.distances[1])
            self.set_velocity()
            rospy.sleep(.25)
            print(self.distances[1])
            return
-        elif self.distances[2] < .2:
+        elif self.distances[2] < .3:
            # too close to right, turn slightly left 
-           self.ang_vel = 2 * (.2 - self.distances[2])
+           self.ang_vel = 2 * (.3 - self.distances[2])
            self.set_velocity()
            rospy.sleep(.25)
            print(self.distances[2])
