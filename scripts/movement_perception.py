@@ -160,6 +160,10 @@ class MovementPerception(object):
             smooth_av1 = -0.5 * self.ang_vel 
             smooth_av2 = -0.25 * self.ang_vel
             sleep = 2.0
+
+            if self.robot_state == ACTION_TURN_01 or self.robot_state == ACTION_TURN_02: 
+                sleep = 4.0
+
             self.set_velocity(smooth_lv1, smooth_av1, sleep)
             self.set_velocity(smooth_lv2, smooth_av1, sleep)
             sleep = 1.0
@@ -210,7 +214,7 @@ class MovementPerception(object):
         self.set_velocity(lv, av, sleep)
 
         av *= .5
-        sleep = 1.0
+        sleep = 1.3
         self.set_velocity(lv, av, sleep) 
         
         # Stop robot rotation
