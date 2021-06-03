@@ -48,6 +48,8 @@ There were two main challenges that we encountered during this project. The firs
 
 ## Future work
 
+Given 2-3 more weeks to continue work on the project, there are two major thing we would like to improve on. Firstly, we would try to implement turning with proportional control. Currently, our robot executes turns by simply rotating 90˚, and in order for this method to work, we have to rely on the robot being perfectly perpendicular to the straight before the turn, so that it can be perfectly in-line with the straight after the turn. However, this is certainly assumption to make when programming with robots where noise and drift is often encountered. Accordingly, we came up with the following high-level implementation of turning with proportional control:
+
 
 
 ## Takeaways
