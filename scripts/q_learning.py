@@ -5,6 +5,7 @@ import numpy as np
 import os
 import csv
 
+
 class QLearning(object):
     def __init__(self):
         # Initialize node
