@@ -31,7 +31,7 @@ After training, we receive a converged Q-matrix that informs the robot of the co
 
 ## System architecture
 
-### TODO: add more. General outline:
+### General outline:
 
 * q_learning.py:
 - manually built action matrix in q_learning.py
