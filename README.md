@@ -33,15 +33,16 @@ After training, we receive a converged Q-matrix that informs the robot of the co
 
 ### General outline:
 
-* q_learning.py:
-- manually built action matrix in q_learning.py
-- implemented Q-learning algorithm and training steps in q_learning.py
-- algorithm only receives reward at maze exit
-- If action is taken that would lead to a dead end, reset algorithm to initial state
-- Q-matrix is considered converged when 5000 iterations pass and no values in the matrix get changed.
+#### q_learning.py
+This file handles the Q-Learning part of our project.  When run, it will create a converged Q-Matrix for our maze.  In it, we manually built a 31x2 action matrix by adding all possible state transitions.  Then, we implemented a Q-Learning algorithm that gives a reward when the end-state is reached.  If it ever randomly takes an action that leads to a dead-end, then it simply restarts the algorithm.  Once the algorithm has converged after 5000 iterations without any change, the algorithm completes.
 
-* movement_perception.py:
-- Continuously scan 0, 90, and 270 degree directions to identify if robot is in straight, turn, or fork (action)
+#### movement_perception.py:
+This file handles the robot's movement and perception as it navigates the maze.  To differentiate between straights, turns, and forks, the robot continuously scans in the 0, 90, and 270 degree directions while moving through straights.  When the robot detects that moving directly forward is no longer possible or is not the only possible path, it will  decide whether it is in a turn or action and then slow to a stop in the intersection.  Should turning be the best possible path, the robot will rotate 90 degrees in-place in the correct direction before driving straight.  If it is in action where it is best to move straight, it will simply continue going straight. 
+
+Although our turns are handled in a way that could potentially lead to error due to lack of proportional control, in our project we handle 3 consecutive actions without issue.  This is due to the proportional control used to align our robot in straights and when transitioning to and between turns.
+
+Actions are read in from a csv file into an array.  The navigation function will continuously run until all actions loaded into the array have been completed.  At that point, the robot has exited the maze and will celebrate.
+
 - Utilize proportional control to center robot while driving through straights and smooth transitions between straights and turns/actions
 - Turning left or right is handled by turning 90 degrees in the correct direction and then driving straight until the turn is exited
 - Reads in actions from converged Q-Matrix
