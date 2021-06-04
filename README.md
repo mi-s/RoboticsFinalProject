@@ -20,7 +20,10 @@ In this maze, there are four forks, and the last three come consecutively after 
 
 An important element to this project was that we took on the task of defining the environment to run Q-Learning training in; this was more or less given to us in the previous project. Accordingly, we had to make some important design choices with respect to our definitions of the state/action spaces. 
 
-### TODO: add more. Explain more about the 0/1 action space definitions. And also that not all states are actually reachable, only 0 2 6 12 and 25.
+In the maze environment, we felt that actions most naturally corresponded to choosing a path at a fork.   At the fork, there are two potential paths.  From these two paths, we defined Action 0 and Action 1. Action 0 refers to taking the path closest to 0 degrees CCW with respect to the robot's orientation a it approaches the fork.  Action 1 refers to the second possible path.  Building on this, we defined states as the sequence of actions the robot has taken to reach the section of the maze it is in.  For example, the robot starts in state " ", and if it decides to take action 0 and then action 1 it will be in state "01".
+
+In our Q-Learning action matrix, we have 31 total states.  If states are defined by our definition above and there are four states, then there are 1 + 2 + 2^2 + 2^3 + 2^4 = 31 total states.  However, most of these states are unreachable.  In our maze, taking the wrong action at any action will immediately lead to a dead end.  Thus, if the robot finds itself in state "0" but state "0" is a dead end, then states "01", "00", "010", and so on also do not exist.  In our final converged Q-Matrix, only states 0 2 6 12 and 25 are entered because they are the only states passed through to complete the maze.
+
 
 ### 3. Robot perception/movement
 
@@ -38,8 +41,11 @@ After training, we receive a converged Q-matrix that informs the robot of the co
 - Q-matrix is considered converged when 5000 iterations pass and no values in the matrix get changed.
 
 * movement_perception.py:
-- 
-
+- Continuously scan 0, 90, and 270 degree directions to identify if robot is in straight, turn, or fork (action)
+- Utilize proportional control to center robot while driving through straights and smooth transitions between straights and turns/actions
+- Turning left or right is handled by turning 90 degrees in the correct direction and then driving straight until the turn is exited
+- Reads in actions from converged Q-Matrix
+- Continuously runs until all actions are complete and the maze is exited
 
 
 ## Challenges
