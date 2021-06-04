@@ -43,12 +43,6 @@ Although our turns are handled in a way that could potentially lead to error due
 
 Actions are read in from a csv file into an array.  The navigation function will continuously run until all actions loaded into the array have been completed.  At that point, the robot has exited the maze and will celebrate.
 
-- Utilize proportional control to center robot while driving through straights and smooth transitions between straights and turns/actions
-- Turning left or right is handled by turning 90 degrees in the correct direction and then driving straight until the turn is exited
-- Reads in actions from converged Q-Matrix
-- Continuously runs until all actions are complete and the maze is exited
-
-
 ## Challenges
 
 There were two main challenges that we encountered during this project. The first one pertains to differentiating between straights, turns, and forks in the maze. By our maze definitions, a straight occurs when there are two walls on either side of the robot, a turn occurs where there is only one wall on either side of the robot, and a fork occurs when there is only one wall in any of the four cardinal directions relative to the robot. It was a bit of a challenge to determine using the LiDAR sensor which of these three conditions our robot was facing. In particular, if our robot was too close to one wall of a straight, its LiDAR sensor would detect an opening and not another wall on the other side of the robot. Our second and most difficult challenge was getting the robot to turn with precision. This was particularly difficult because we faced lots of random noise and drift after the robot reached the end of a straight and was beginning its turn. Our turn instruction is for the robot to simply turn 90 degrees. However, due to noise and drift, the robot often began its turn ~10˚ off the perpendicular. This slight inaccuracy was enough to cause our robot to keep hitting walls after execution of the turn. Our solution was to "smooth" the transition between moving straight and executing a turn using proportional control methodologies.
